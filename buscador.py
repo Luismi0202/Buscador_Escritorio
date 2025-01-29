@@ -11,8 +11,16 @@ def instalar_paquete(paquete):
     try:
         __import__(paquete)
     except ImportError:
-        subprocess.run([sys.executable, "-m", "pip", "install", paquete])
-        __import__(paquete)
+        print(f"Instalando {paquete}...")
+        resultado = subprocess.run([sys.executable, "-m", "pip", "install", paquete], capture_output=True, text=True)
+        if resultado.returncode == 0:
+            print(f"{paquete} instalado correctamente.")
+            try:
+                __import__(paquete)
+            except ImportError:
+                print(f"Error: No se pudo importar {paquete} después de instalarlo.")
+        else:
+            print(f"Error al instalar {paquete}:\n{resultado.stderr}")
 
 instalar_paquete("pyperclip")
 
