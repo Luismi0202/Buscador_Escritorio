@@ -6,7 +6,7 @@ import sys
 import json
 import os
 
-# Verificar e instalar pyperclip y speech_recognition si no están disponibles
+# Verificar e instalar pyperclip si no están disponibles
 def instalar_paquete(paquete):
     try:
         __import__(paquete)
@@ -15,6 +15,7 @@ def instalar_paquete(paquete):
         __import__(paquete)
 
 instalar_paquete("pyperclip")
+
 import pyperclip
 
 # Ruta del archivo de historial
