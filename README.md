@@ -44,21 +44,21 @@ def buscar():
         url = f"https://www.google.com/search?q={query}"
         webbrowser.open(url)
 
-# Crear la ventana
+**Crear la ventana**
 root = tk.Tk()
 root.title("Buscador de Escritorio")
 root.geometry("400x100")
 
-# Campo de entrada
+**Campo de entrada**
 entry = tk.Entry(root, width=40)
 entry.pack(pady=10)
 entry.bind("<Return>", lambda event: buscar())  # Buscar al presionar Enter
 
-# Botón de búsqueda
+**Botón de búsqueda**
 btn = tk.Button(root, text="Buscar", command=buscar)
 btn.pack()
 
-# Ejecutar la aplicación
+**Ejecutar la aplicación**
 root.mainloop()
 
 # 🎯 Funcionalidades
@@ -71,8 +71,3 @@ Se abre el navegador predeterminado.
 
 Presiona Enter o el botón "Buscar" para ejecutar la búsqueda.
 
-# 📌 Mejoras Futuras
-
-Permitir elegir entre diferentes motores de búsqueda (Google, Bing, DuckDuckGo).
-
-Agregar historial de búsqueda.
