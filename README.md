@@ -3,7 +3,10 @@ Buscador de Escritorio con Python
 
 Este es un sencillo buscador de escritorio creado con Python y Tkinter. Permite ingresar una consulta y abrir el navegador predeterminado con los resultados de búsqueda en Google.
 
-📌 Requisitos
+#🎯Objetivo
+Mi objetivo con este proyecto es crear un navegador pequeño que se ejecute en cuanto se encienda el ordenador (falta por hacer un ejecutable que se ponga como aplicación de arranque) y así podamos buscar las cosas fácilmente sin tener que estar dentro del propio navegador.
+
+#📌 Requisitos
 
 Este proyecto utiliza bibliotecas estándar de Python, por lo que no es necesario instalar paquetes adicionales.
 
@@ -13,7 +16,7 @@ Tkinter (incluido en Python)
 
 webbrowser (incluido en Python)
 
-🚀 Instalación y Uso
+#🚀 Instalación y Uso
 
 Clona este repositorio o descarga el archivo buscador.py.
 
@@ -29,7 +32,7 @@ Escribe la consulta y presiona Enter o el botón "Buscar".
 
 Se abrirá el navegador con los resultados de Google.
 
-📜 Código Principal
+#📜 Código Principal
 
 import tkinter as tk
 import webbrowser
@@ -57,7 +60,7 @@ btn.pack()
 # Ejecutar la aplicación
 root.mainloop()
 
-🎯 Funcionalidades
+#🎯 Funcionalidades
 
 Interfaz simple con Tkinter.
 
@@ -67,7 +70,7 @@ Se abre el navegador predeterminado.
 
 Presiona Enter o el botón "Buscar" para ejecutar la búsqueda.
 
-📌 Mejoras Futuras
+#📌 Mejoras Futuras
 
 Permitir elegir entre diferentes motores de búsqueda (Google, Bing, DuckDuckGo).
 
