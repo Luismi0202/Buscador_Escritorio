@@ -4,6 +4,7 @@ Buscador de Escritorio con Python
 Este es un sencillo buscador de escritorio creado con Python y Tkinter. Permite ingresar una consulta y abrir el navegador predeterminado con los resultados de búsqueda en Google.
 
 #🎯Objetivo
+
 Mi objetivo con este proyecto es crear un navegador pequeño que se ejecute en cuanto se encienda el ordenador (falta por hacer un ejecutable que se ponga como aplicación de arranque) y así podamos buscar las cosas fácilmente sin tener que estar dentro del propio navegador.
 
 #📌 Requisitos
