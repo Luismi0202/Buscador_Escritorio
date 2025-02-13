@@ -14,7 +14,7 @@ else:
     history = []
 
 # Configuración de SerpAPI
-SERPAPI_KEY = "d1258f83e516cb86e85ff0c7f42115d872928aebd7aefdb229d5b15fbfd6024e"
+SERPAPI_KEY = "<TU_CLAVE_DE_SERPAPI>"
 SERPAPI_URL = "https://serpapi.com/search"
 
 def search(query):
