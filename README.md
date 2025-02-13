@@ -26,7 +26,7 @@ cd buscador-multimotor
 
 ### Configuración
 1. Obtén una clave de SerpAPI en [SerpAPI](https://serpapi.com/) 
-2. Reemplaza `<TU_CLAVE_DE_SERPAPI>` en el código con tu clave personal.
+2. Cuando abras el programa, se te pedirá una API
 
 ## Uso
 ```bash
