@@ -1,4 +1,4 @@
-# Buscador Multimotor con Historial
+# Buscador de Escritorio
 
 Este es un programa basado en Python y Tkinter que permite realizar búsquedas en Google a través de la API de SerpAPI, almacenar el historial de búsquedas y visualizar los resultados en una interfaz gráfica.
 
@@ -20,11 +20,8 @@ Este es un programa basado en Python y Tkinter que permite realizar búsquedas e
 ## Instalación
 ```bash
 # Clona o descarga este repositorio
-git clone https://github.com/tu_usuario/buscador-multimotor.git
+git clone https://github.com/tu_usuario/Buscador_Escritorio.git
 cd buscador-multimotor
-
-# Instala las dependencias necesarias (si no las tienes ya instaladas)
-pip install requests
 ```
 
 ### Configuración
@@ -33,7 +30,7 @@ pip install requests
 
 ## Uso
 ```bash
-python script.py
+python buscador.py
 ```
 
 1. Escribe un término de búsqueda en la barra de entrada y presiona "Buscar".
