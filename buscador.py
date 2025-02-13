@@ -1,151 +1,161 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
-import webbrowser
-import subprocess
-import sys
+from tkinter import messagebox, scrolledtext
 import json
 import os
+import webbrowser
+import requests
 
-# Verificar e instalar pyperclip si no están disponibles
-def instalar_paquete(paquete):
-    try:
-        __import__(paquete)
-    except ImportError:
-        print(f"Instalando {paquete}...")
-        resultado = subprocess.run([sys.executable, "-m", "pip", "install", paquete], capture_output=True, text=True)
-        if resultado.returncode == 0:
-            print(f"{paquete} instalado correctamente.")
-            try:
-                __import__(paquete)
-            except ImportError:
-                print(f"Error: No se pudo importar {paquete} después de instalarlo.")
-        else:
-            print(f"Error al instalar {paquete}:\n{resultado.stderr}")
+# Configuración del archivo de historial
+HISTORY_FILE = "./historial.json"
+if os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, 'r', encoding='utf-8') as file:
+        history = json.load(file)
+else:
+    history = []
 
-instalar_paquete("pyperclip")
+# Configuración de SerpAPI
+SERPAPI_KEY = "d1258f83e516cb86e85ff0c7f42115d872928aebd7aefdb229d5b15fbfd6024e"
+SERPAPI_URL = "https://serpapi.com/search"
 
-import pyperclip
+def search(query):
+    """Realiza una búsqueda real usando SerpAPI."""
+    params = {
+        "q": query,
+        "api_key": SERPAPI_KEY,
+        "engine": "google",
+        "num": 5
+    }
+    response = requests.get(SERPAPI_URL, params=params)
+    if response.status_code == 200:
+        results = response.json().get("organic_results", [])
+        return results
+    else:
+        messagebox.showerror("Error", "No se pudieron obtener los resultados de búsqueda.")
+        return []
 
-# Ruta del archivo de historial
-HISTORIAL_FILE = "./historial.json"
+def save_history():
+    """Guarda el historial en un archivo JSON."""
+    with open(HISTORY_FILE, 'w', encoding='utf-8') as file:
+        json.dump(history, file, ensure_ascii=False, indent=4)
 
-# Motores de búsqueda
-motores = {
-    "Google": "https://www.google.com/search?q=",
-    "Imágenes": "https://www.google.com/search?tbm=isch&q=",
-    "Noticias": "https://www.google.com/search?tbm=nws&q=",
-    "YouTube": "https://www.youtube.com/results?search_query="
-}
+def clear_history():
+    """Limpia el historial de búsquedas."""
+    global history
+    history = []
+    save_history()
+    update_history_list()
 
-# Cargar historial desde archivo
-def cargar_historial():
-    if os.path.exists(HISTORIAL_FILE):
-        try:
-            with open(HISTORIAL_FILE, "r", encoding="utf-8") as file:
-                data = json.load(file)
-                return data.get("historial", [])
-        except json.JSONDecodeError:
-            return []
-    return []
+def delete_search():
+    """Elimina una búsqueda específica del historial."""
+    selection = history_list.curselection()
+    if selection:
+        index = selection[0]
+        del history[index]
+        save_history()
+        update_history_list()
 
-# Guardar historial en archivo
-def guardar_historial():
-    with open(HISTORIAL_FILE, "w", encoding="utf-8") as file:
-        json.dump({"historial": historial}, file, ensure_ascii=False, indent=4)
+def update_history_list():
+    """Actualiza la lista del historial en la interfaz."""
+    history_list.delete(0, tk.END)
+    for item in history:
+        history_list.insert(tk.END, item['query'])
 
-# Función para buscar
-def buscar():
+def on_search():
+    """Maneja la acción de búsqueda."""
     query = entry.get().strip()
-    if query:
-        motor = motores[combo_motores.get()]
-        url = f"{motor}{query}"
-        webbrowser.open(url)
+    if not query:
+        return
+    
+    # Si la búsqueda ya está en el historial, se elimina
+    global history
+    history = [item for item in history if item['query'] != query]
+    
+    results = search(query)
+    display_results(results)
+    
+    # Se agrega la nueva búsqueda al principio
+    history.insert(0, {"query": query, "results": results})
+    save_history()
+    update_history_list()
 
-        historial.insert(0, query)
-        lista_historial.insert(0, query)
-        guardar_historial()
+def display_results(results):
+    """Muestra los resultados en el área de texto."""
+    text_area.delete(1.0, tk.END)
+    if not results:
+        text_area.insert(tk.END, "No se encontraron resultados.\n")
+        return
+    
+    for result in results:
+        title = result.get("title", "Sin título")
+        link = result.get("link", "#")
+        snippet = result.get("snippet", "Sin descripción disponible.")
+        text_area.insert(tk.END, f"Título: {title}\n")
+        text_area.insert(tk.END, "Enlace: ", "normal")
+        text_area.insert(tk.END, link, ("link", link))
+        text_area.insert(tk.END, "\n")
+        text_area.insert(tk.END, f"Descripción: {snippet}\n")
+        text_area.insert(tk.END, "-" * 50 + "\n")
 
-# Función para limpiar entrada
-def limpiar():
-    entry.delete(0, tk.END)
+def on_link_click(event):
+    """Abre el enlace en el navegador."""
+    widget = event.widget
+    index = widget.index(f"@{event.x},{event.y}")
+    for tag in widget.tag_names(index):
+        if tag.startswith("http"):
+            webbrowser.open(tag)
+            break
 
-# Función para copiar enlace al portapapeles
-def copiar_enlace():
-    query = entry.get().strip()
-    if query:
-        url = f"{motores[combo_motores.get()]}{query}"
-        pyperclip.copy(url)
-        messagebox.showinfo("Copiado", "Enlace copiado al portapapeles.")
+def on_history_select():
+    """Maneja la selección de una búsqueda previa."""
+    selection = history_list.curselection()
+    if selection:
+        index = selection[0]
+        query = history[index]['query']
+        entry.delete(0, tk.END)
+        entry.insert(0, query)
 
-# Función para vaciar historial
-def vaciar_historial():
-    global historial
-    historial = []  # Vaciar la lista en memoria
-    lista_historial.delete(0, tk.END)  # Limpiar la lista visible
-    guardar_historial()  # Guardar el archivo vacío
+def repeat_search():
+    """Realiza la búsqueda de un término seleccionado del historial."""
+    on_history_select()
+    on_search()
 
-# Función para eliminar la selección del historial
-def eliminar_seleccion():
-    seleccionados = lista_historial.curselection()
-    if seleccionados:
-        for index in reversed(seleccionados):
-            # Eliminar el elemento de la lista visible
-            lista_historial.delete(index)
-            # Eliminar el elemento de la lista en memoria
-            historial.pop(index)
-        guardar_historial()  # Guardar los cambios en el archivo
-
-# Crear ventana
+# Configuración de la interfaz gráfica
 root = tk.Tk()
-root.title("DeskBrowser")
-root.geometry("450x400")
-root.resizable(False, False)
+root.title("Buscador Multimotor")
+root.geometry("800x600")
 
-# Estilos
-style = ttk.Style()
-style.theme_use("clam")
-style.configure("TButton", font=("Arial", 10))
-style.configure("TEntry", font=("Arial", 12))
+frame = tk.Frame(root)
+frame.pack(pady=10)
 
-# Entrada de búsqueda
-entry = ttk.Entry(root, width=40, font=("Arial", 12))
-entry.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
-entry.bind("<Return>", lambda event: buscar())
+entry = tk.Entry(frame, width=50)
+entry.pack(side=tk.LEFT, padx=5)
 
-# Selector de motor de búsqueda
-combo_motores = ttk.Combobox(root, values=list(motores.keys()), state="readonly")
-combo_motores.set("Google")
-combo_motores.grid(row=1, column=0, padx=10, pady=5, columnspan=2, sticky="ew")
+search_button = tk.Button(frame, text="Buscar", command=on_search)
+search_button.pack(side=tk.LEFT)
 
-# Botones
-btn_buscar = ttk.Button(root, text="Buscar", command=buscar)
-btn_buscar.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
+text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=90, height=20)
+text_area.pack(padx=10, pady=10)
+text_area.tag_config("link", foreground="blue", underline=1)
+text_area.tag_bind("link", "<Button-1>", on_link_click)
 
-btn_limpiar = ttk.Button(root, text="Limpiar", command=limpiar)
-btn_limpiar.grid(row=2, column=1, padx=6, pady=6, sticky="ew")
+history_frame = tk.Frame(root)
+history_frame.pack(pady=10)
 
-btn_copiar = ttk.Button(root, text="Copiar enlace", command=copiar_enlace)
-btn_copiar.grid(row=4, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+history_list = tk.Listbox(history_frame, width=50, height=10)
+history_list.pack(side=tk.LEFT, padx=5)
 
-# Botón para vaciar historial
-btn_vaciar = ttk.Button(root, text="Vaciar historial", command=vaciar_historial)
-btn_vaciar.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+button_frame = tk.Frame(history_frame)
+button_frame.pack(side=tk.LEFT)
 
-# Botón para eliminar la selección del historial
-btn_eliminar_seleccion = ttk.Button(root, text="Eliminar selección", command=eliminar_seleccion)
-btn_eliminar_seleccion.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+clear_history_button = tk.Button(button_frame, text="Vaciar Historial", command=clear_history)
+clear_history_button.pack(fill=tk.X)
 
-# Historial de búsquedas
-historial_label = tk.Label(root, text="Historial", font=("Arial", 10, "bold"))
-historial_label.grid(row=7, column=0, columnspan=2, pady=(5, 0))
+delete_search_button = tk.Button(button_frame, text="Eliminar Seleccionado", command=delete_search)
+delete_search_button.pack(fill=tk.X)
 
-# Lista de historial con selección múltiple
-lista_historial = tk.Listbox(root, height=5, selectmode=tk.MULTIPLE)
-lista_historial.grid(row=8, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+repeat_search_button = tk.Button(button_frame, text="Volver a Buscar", command=repeat_search)
+repeat_search_button.pack(fill=tk.X)
 
-# Cargar historial previo
-historial = cargar_historial()
-for busqueda in historial:
-    lista_historial.insert(tk.END, busqueda)
+update_history_list()
 
 root.mainloop()
