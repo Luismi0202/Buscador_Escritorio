@@ -1,73 +1,52 @@
-# Buscador_Escritorio
-Buscador de Escritorio con Python
+# Buscador Multimotor con Historial
 
-Este es un sencillo buscador de escritorio creado con Python y Tkinter. Permite ingresar una consulta y abrir el navegador predeterminado con los resultados de búsqueda en Google.
+Este es un programa basado en Python y Tkinter que permite realizar búsquedas en Google a través de la API de SerpAPI, almacenar el historial de búsquedas y visualizar los resultados en una interfaz gráfica.
 
-# 🎯Objetivo
+## Características
+- 🔍 Realiza búsquedas en Google usando la API de SerpAPI.
+- 📌 Muestra los resultados con enlaces clickeables.
+- 📂 Guarda el historial de búsquedas en un archivo JSON.
+- 🗑️ Permite eliminar búsquedas individuales del historial.
+- 🚀 Opción para vaciar todo el historial.
+- 🔄 Posibilidad de volver a buscar términos del historial.
+- 🚫 Evita duplicados en el historial, moviendo una búsqueda repetida al primer lugar.
 
-Mi objetivo con este proyecto es crear un navegador pequeño que se ejecute en cuanto se encienda el ordenador (falta por hacer un ejecutable que se ponga como aplicación de arranque) y así podamos buscar las cosas fácilmente sin tener que estar dentro del propio navegador.
+## Requisitos
+### Para ejecutar el programa, necesitas:
+- Python 3.x
+- Módulos necesarios: `tkinter`, `requests`, `json`, `os`, `webbrowser`
+- Una clave de API de SerpAPI
 
-# 📌 Requisitos
+## Instalación
+```bash
+# Clona o descarga este repositorio
+git clone https://github.com/tu_usuario/buscador-multimotor.git
+cd buscador-multimotor
 
-Este proyecto utiliza bibliotecas estándar de Python, por lo que no es necesario instalar paquetes adicionales.
+# Instala las dependencias necesarias (si no las tienes ya instaladas)
+pip install requests
+```
 
-Python 3.x
+### Configuración
+1. Obtén una clave de SerpAPI en [SerpAPI](https://serpapi.com/) 
+2. Reemplaza `<TU_CLAVE_DE_SERPAPI>` en el código con tu clave personal.
 
-Tkinter (incluido en Python)
+## Uso
+```bash
+python script.py
+```
 
-webbrowser (incluido en Python)
+1. Escribe un término de búsqueda en la barra de entrada y presiona "Buscar".
+2. Los resultados aparecerán en la ventana con enlaces clickeables.
+3. Puedes seleccionar búsquedas anteriores en la lista de historial y repetirlas.
+4. Usa los botones "Eliminar Seleccionado" o "Vaciar Historial" según sea necesario.
 
-# 🚀 Instalación y Uso
+## Notas
+- ⚠️ Si realizas varias búsquedas del mismo término, este se moverá al inicio en lugar de duplicarse en el historial.
+- 🌐 Para que los enlaces funcionen correctamente, asegúrate de tener acceso a Internet.
 
-Clona este repositorio o descarga el archivo buscador.py.
+## Licencia
+Este proyecto es de uso libre. Puedes modificarlo y adaptarlo según tus necesidades.
 
-Asegúrate de tener Python instalado.
 
-Ejecuta el script con el siguiente comando:
-
-python buscador.py
-
-Aparecerá una ventana con un campo de búsqueda.
-
-Escribe la consulta y presiona Enter o el botón "Buscar".
-
-Se abrirá el navegador con los resultados de Google.
-
-# 📜 Código Principal
-
-import tkinter as tk
-import webbrowser
-
-def buscar():
-    query = entry.get()
-    if query:
-        url = f"https://www.google.com/search?q={query}"
-        webbrowser.open(url)
-
-**Crear la ventana**
-root = tk.Tk()
-root.title("Buscador de Escritorio")
-root.geometry("400x100")
-
-**Campo de entrada**
-entry = tk.Entry(root, width=40)
-entry.pack(pady=10)
-entry.bind("<Return>", lambda event: buscar())  # Buscar al presionar Enter
-
-**Botón de búsqueda**
-btn = tk.Button(root, text="Buscar", command=buscar)
-btn.pack()
-
-**Ejecutar la aplicación**
-root.mainloop()
-
-# 🎯 Funcionalidades
-
-Interfaz simple con Tkinter.
-
-Busca en Google automáticamente.
-
-Se abre el navegador predeterminado.
-
-Presiona Enter o el botón "Buscar" para ejecutar la búsqueda.
 
