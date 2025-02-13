@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, scrolledtext
+from tkinter import messagebox, scrolledtext, simpledialog
 import json
 import os
 import webbrowser
@@ -24,20 +24,77 @@ def instalar_paquete(paquete):
 instalar_paquete("requests")
 import requests
 
-# Configuración del archivo de historial
+# Configuración de archivos
 HISTORY_FILE = "./historial.json"
+CONFIG_FILE = "./config.json"
+
+# Inicializar el archivo de configuración si no existe o está vacío
+if not os.path.exists(CONFIG_FILE):
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
+        json.dump({"serpapi_key": None}, file)  # Inicializar con un valor predeterminado
+
+# Cargar configuración
+try:
+    with open(CONFIG_FILE, 'r', encoding='utf-8') as file:
+        config = json.load(file)
+        # Verificar si config es un diccionario
+        if not isinstance(config, dict):
+            raise ValueError("El archivo config.json no tiene el formato correcto.")
+except (json.JSONDecodeError, ValueError):
+    # Si el archivo está vacío, no es válido o no es un diccionario, inicializar con un valor predeterminado
+    config = {"serpapi_key": None}
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
+        json.dump(config, file)
+
+SERPAPI_KEY = config.get("serpapi_key")  # Usar .get() para evitar errores si la clave no existe
+SERPAPI_URL = "https://serpapi.com/search"
+
+# Cargar historial
 if os.path.exists(HISTORY_FILE):
     with open(HISTORY_FILE, 'r', encoding='utf-8') as file:
         history = json.load(file)
 else:
     history = []
 
-# Configuración de SerpAPI
-SERPAPI_KEY = "<TU_CLAVE_DE_SERPAPI>"
-SERPAPI_URL = "https://serpapi.com/search"
+def save_config():
+    """Guarda la configuración en el archivo config.json."""
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
+        json.dump(config, file, ensure_ascii=False, indent=4)
+
+def update_api_key(new_key):
+    """Actualiza la clave de API y la guarda en el archivo de configuración."""
+    global SERPAPI_KEY
+    SERPAPI_KEY = new_key
+    config["serpapi_key"] = new_key
+    save_config()
+
+def get_api_key():
+    """Solicita la clave de API al usuario si no está configurada."""
+    global SERPAPI_KEY
+    if not SERPAPI_KEY:
+        new_key = simpledialog.askstring("Clave de API", "Ingrese su clave de SerpAPI:", parent=root)
+        if new_key:
+            update_api_key(new_key)
+        else:
+            messagebox.showerror("Error", "La clave de API es requerida para realizar búsquedas.")
+            return False
+    return True
+
+def modify_api_key():
+    """Permite al usuario modificar la clave de API."""
+    new_key = simpledialog.askstring("Modificar Clave de API", "Ingrese la nueva clave de SerpAPI:", parent=root)
+    if new_key:
+        update_api_key(new_key)
+        messagebox.showinfo("Éxito", "Clave de API actualizada correctamente.")
+    else:
+        messagebox.showerror("Error", "La clave de API no puede estar vacía.")
 
 def search(query):
     """Realiza una búsqueda real usando SerpAPI."""
+    if not SERPAPI_KEY:
+        messagebox.showerror("Error", "La clave de API no está configurada.")
+        return []
+    
     params = {
         "q": query,
         "api_key": SERPAPI_KEY,
@@ -143,6 +200,11 @@ root = tk.Tk()
 root.title("Buscador Multimotor")
 root.geometry("800x600")
 
+# Solicitar la clave de API al iniciar el programa si no está configurada
+if not get_api_key():
+    root.destroy()  # Cierra la aplicación si no se proporciona una clave de API
+    sys.exit()
+
 frame = tk.Frame(root)
 frame.pack(pady=10)
 
@@ -151,6 +213,10 @@ entry.pack(side=tk.LEFT, padx=5)
 
 search_button = tk.Button(frame, text="Buscar", command=on_search)
 search_button.pack(side=tk.LEFT)
+
+# Botón para modificar la clave de API
+modify_key_button = tk.Button(frame, text="Modificar Clave API", command=modify_api_key)
+modify_key_button.pack(side=tk.LEFT, padx=5)
 
 text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=90, height=20)
 text_area.pack(padx=10, pady=10)
