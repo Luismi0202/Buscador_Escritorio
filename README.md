@@ -29,9 +29,14 @@ cd buscador-multimotor
 2. Cuando abras el programa, se te pedirá una API
 
 ## Uso
-```bash
-python buscador.py
-```
+Puedes abrir el archivo ejectuable .exe que se encuentra en la carpeta principal o si tienes el módulo de python instalado, puedes ejecutar en terminal el archivo buscador.py que se encuentra en la carpeta "código"
+
+Para ejecutar el código con py:
+``python
+python buscador.py (desde la carpeta código en terminal)
+``
+
+El .exe simplemente se ejecutará dándole doble click.
 
 1. Escribe un término de búsqueda en la barra de entrada y presiona "Buscar".
 2. Los resultados aparecerán en la ventana con enlaces clickeables.
