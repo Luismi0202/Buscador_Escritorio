@@ -6,93 +6,160 @@ import webbrowser
 import sys
 import subprocess
 
-def instalar_paquete(paquete):
-    try:
-        __import__(paquete)
-    except ImportError:
-        print(f"Instalando {paquete}...")
-        resultado = subprocess.run([sys.executable, "-m", "pip", "install", paquete], capture_output=True, text=True)
-        if resultado.returncode == 0:
-            print(f"{paquete} instalado correctamente.")
-            try:
-                __import__(paquete)
-            except ImportError:
-                print(f"Error: No se pudo importar {paquete} después de instalarlo.")
-        else:
-            print(f"Error al instalar {paquete}:\n{resultado.stderr}")
+# ------------------------------
+# Utility Functions
+# ------------------------------
 
-instalar_paquete("requests")
+def install_package(package):
+    """
+    Installs a Python package using pip if it is not already installed.
+
+    Args:
+        package (str): The name of the package to install.
+    """
+    try:
+        __import__(package)
+    except ImportError:
+        print(f"Installing {package}...")
+        result = subprocess.run([sys.executable, "-m", "pip", "install", package], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"{package} installed successfully.")
+            try:
+                __import__(package)
+            except ImportError:
+                print(f"Error: Could not import {package} after installation.")
+        else:
+            print(f"Error installing {package}:\n{result.stderr}")
+
+install_package("requests")
 import requests
 
-# Configuración de archivos
-HISTORY_FILE = "./historial.json"
+# ------------------------------
+# Configuration and Initialization
+# ------------------------------
+
+# File configuration
+HISTORY_FILE = "./history.json"
 CONFIG_FILE = "./config.json"
 
-# Inicializar el archivo de configuración si no existe o está vacío
+# Initialize the configuration file if it does not exist or is empty
 if not os.path.exists(CONFIG_FILE):
     with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
-        json.dump({"serpapi_key": None}, file)  # Inicializar con un valor predeterminado
+        json.dump({"serpapi_key": None, "language": "en"}, file)  # Initialize with default values
 
-# Cargar configuración
+# Load configuration
 try:
     with open(CONFIG_FILE, 'r', encoding='utf-8') as file:
         config = json.load(file)
-        # Verificar si config es un diccionario
         if not isinstance(config, dict):
-            raise ValueError("El archivo config.json no tiene el formato correcto.")
+            raise ValueError("The config.json file is not properly formatted.")
 except (json.JSONDecodeError, ValueError):
-    # Si el archivo está vacío, no es válido o no es un diccionario, inicializar con un valor predeterminado
-    config = {"serpapi_key": None}
+    config = {"serpapi_key": None, "language": "en"}
     with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
         json.dump(config, file)
 
-SERPAPI_KEY = config.get("serpapi_key")  # Usar .get() para evitar errores si la clave no existe
+SERPAPI_KEY = config.get("serpapi_key")
+LANGUAGE = config.get("language", "en")  # Default to English if not specified
 SERPAPI_URL = "https://serpapi.com/search"
 
-# Cargar historial
+# Load history
 if os.path.exists(HISTORY_FILE):
     with open(HISTORY_FILE, 'r', encoding='utf-8') as file:
         history = json.load(file)
 else:
     history = []
 
+# ------------------------------
+# Configuration Management
+# ------------------------------
+
 def save_config():
-    """Guarda la configuración en el archivo config.json."""
+    """
+    Saves the current configuration to the config.json file.
+    """
     with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
 
 def update_api_key(new_key):
-    """Actualiza la clave de API y la guarda en el archivo de configuración."""
+    """
+    Updates the API key and saves it to the configuration file.
+
+    Args:
+        new_key (str): The new API key to save.
+    """
     global SERPAPI_KEY
     SERPAPI_KEY = new_key
     config["serpapi_key"] = new_key
     save_config()
 
 def get_api_key():
-    """Solicita la clave de API al usuario si no está configurada."""
+    """
+    Prompts the user for the API key if it is not configured.
+
+    Returns:
+        bool: True if the API key is configured, False otherwise.
+    """
     global SERPAPI_KEY
     if not SERPAPI_KEY:
-        new_key = simpledialog.askstring("Clave de API", "Ingrese su clave de SerpAPI:", parent=root)
+        new_key = simpledialog.askstring("API Key", "Enter your SerpAPI key:", parent=root)
         if new_key:
             update_api_key(new_key)
         else:
-            messagebox.showerror("Error", "La clave de API es requerida para realizar búsquedas.")
+            messagebox.showerror("Error", "The API key is required to perform searches.")
             return False
     return True
 
 def modify_api_key():
-    """Permite al usuario modificar la clave de API."""
-    new_key = simpledialog.askstring("Modificar Clave de API", "Ingrese la nueva clave de SerpAPI:", parent=root)
+    """
+    Allows the user to modify the API key through a dialog.
+    """
+    new_key = simpledialog.askstring("Modify API Key", "Enter the new SerpAPI key:", parent=root)
     if new_key:
         update_api_key(new_key)
-        messagebox.showinfo("Éxito", "Clave de API actualizada correctamente.")
+        messagebox.showinfo("Success", "API key updated successfully.")
     else:
-        messagebox.showerror("Error", "La clave de API no puede estar vacía.")
+        messagebox.showerror("Error", "The API key cannot be empty.")
+
+def modify_language():
+    """
+    Allows the user to modify the application language.
+    """
+    global LANGUAGE
+    new_language = simpledialog.askstring(
+        "Modify Language",
+        "Enter the language code ('en' for English, 'es' for Spanish):",
+        parent=root
+    )
+    if new_language in ["en", "es"]:
+        LANGUAGE = new_language
+        config["language"] = new_language
+        save_config()
+        messagebox.showinfo(
+            "Success" if LANGUAGE == "en" else "Éxito",
+            "Language updated successfully." if LANGUAGE == "en" else "Idioma actualizado correctamente."
+        )
+    else:
+        messagebox.showerror(
+            "Error",
+            "Invalid language code. Use 'en' for English or 'es' for Spanish."
+        )
+
+# ------------------------------
+# Search Functionality
+# ------------------------------
 
 def search(query):
-    """Realiza una búsqueda real usando SerpAPI."""
+    """
+    Performs a search using SerpAPI.
+
+    Args:
+        query (str): The search query.
+
+    Returns:
+        list: A list of search results, or an empty list if the search fails.
+    """
     if not SERPAPI_KEY:
-        messagebox.showerror("Error", "La clave de API no está configurada.")
+        messagebox.showerror("Error", "The API key is not configured.")
         return []
     
     params = {
@@ -103,26 +170,35 @@ def search(query):
     }
     response = requests.get(SERPAPI_URL, params=params)
     if response.status_code == 200:
-        results = response.json().get("organic_results", [])
-        return results
+        return response.json().get("organic_results", [])
     else:
-        messagebox.showerror("Error", "No se pudieron obtener los resultados de búsqueda.")
+        messagebox.showerror("Error", "Could not retrieve search results.")
         return []
 
+# ------------------------------
+# History Management
+# ------------------------------
+
 def save_history():
-    """Guarda el historial en un archivo JSON."""
+    """
+    Saves the search history to the history.json file.
+    """
     with open(HISTORY_FILE, 'w', encoding='utf-8') as file:
         json.dump(history, file, ensure_ascii=False, indent=4)
 
 def clear_history():
-    """Limpia el historial de búsquedas."""
+    """
+    Clears the search history and updates the interface.
+    """
     global history
     history = []
     save_history()
     update_history_list()
 
 def delete_search():
-    """Elimina una búsqueda específica del historial."""
+    """
+    Deletes a specific search from the history based on the user's selection.
+    """
     selection = history_list.curselection()
     if selection:
         index = selection[0]
@@ -131,49 +207,65 @@ def delete_search():
         update_history_list()
 
 def update_history_list():
-    """Actualiza la lista del historial en la interfaz."""
+    """
+    Updates the history list displayed in the interface.
+    """
     history_list.delete(0, tk.END)
     for item in history:
         history_list.insert(tk.END, item['query'])
 
+# ------------------------------
+# GUI Event Handlers
+# ------------------------------
+
 def on_search():
-    """Maneja la acción de búsqueda."""
+    """
+    Handles the search action triggered by the user.
+    """
     query = entry.get().strip()
     if not query:
         return
     
-    # Si la búsqueda ya está en el historial, se elimina
     global history
     history = [item for item in history if item['query'] != query]
     
     results = search(query)
     display_results(results)
     
-    # Se agrega la nueva búsqueda al principio
     history.insert(0, {"query": query, "results": results})
     save_history()
     update_history_list()
 
 def display_results(results):
-    """Muestra los resultados en el área de texto."""
+    """
+    Displays the search results in the text area.
+
+    Args:
+        results (list): A list of search results.
+    """
     text_area.delete(1.0, tk.END)
     if not results:
-        text_area.insert(tk.END, "No se encontraron resultados.\n")
+        text_area.insert(tk.END, "No results found.\n" if LANGUAGE == "en" else "No se encontraron resultados.\n")
         return
     
     for result in results:
-        title = result.get("title", "Sin título")
+        title = result.get("title", "No title" if LANGUAGE == "en" else "Sin título")
         link = result.get("link", "#")
-        snippet = result.get("snippet", "Sin descripción disponible.")
-        text_area.insert(tk.END, f"Título: {title}\n")
-        text_area.insert(tk.END, "Enlace: ", "normal")
+        snippet = result.get("snippet", "No description available." if LANGUAGE == "en" else "Sin descripción disponible.")
+        text_area.insert(tk.END, f"Title: {title}\n" if LANGUAGE == "en" else f"Título: {title}\n")
+        text_area.insert(tk.END, "Link: " if LANGUAGE == "en" else "Enlace: ", "normal")
         text_area.insert(tk.END, link, ("link", link))
         text_area.insert(tk.END, "\n")
-        text_area.insert(tk.END, f"Descripción: {snippet}\n")
+        text_area.insert(tk.END, f"Description: {snippet}\n" if LANGUAGE == "en" else f"Descripción: {snippet}\n")
         text_area.insert(tk.END, "-" * 50 + "\n")
 
 def on_link_click(event):
-    """Abre el enlace en el navegador."""
+    """
+    Opens a link in the browser when clicked.
+
+    Args:
+        event: The click event.
+    """
     widget = event.widget
     index = widget.index(f"@{event.x},{event.y}")
     for tag in widget.tag_names(index):
@@ -182,7 +274,9 @@ def on_link_click(event):
             break
 
 def on_history_select():
-    """Maneja la selección de una búsqueda previa."""
+    """
+    Handles the selection of a previous search from the history list.
+    """
     selection = history_list.curselection()
     if selection:
         index = selection[0]
@@ -191,56 +285,75 @@ def on_history_select():
         entry.insert(0, query)
 
 def repeat_search():
-    """Realiza la búsqueda de un término seleccionado del historial."""
+    """
+    Repeats a search for a term selected from the history list.
+    """
     on_history_select()
     on_search()
 
-# Configuración de la interfaz gráfica
-root = tk.Tk()
-root.title("Buscador Multimotor")
-root.geometry("800x600")
+# ------------------------------
+# Main Function
+# ------------------------------
 
-# Solicitar la clave de API al iniciar el programa si no está configurada
-if not get_api_key():
-    root.destroy()  # Cierra la aplicación si no se proporciona una clave de API
-    sys.exit()
+def main():
+    """
+    Main function to initialize and run the application.
+    """
+    global root, entry, history_list, text_area
 
-frame = tk.Frame(root)
-frame.pack(pady=10)
+    root = tk.Tk()
+    root.title("Multi-Engine Search" if LANGUAGE == "en" else "Buscador Multimotor")
+    root.geometry("800x600")
 
-entry = tk.Entry(frame, width=50)
-entry.pack(side=tk.LEFT, padx=5)
+    if not get_api_key():
+        root.destroy()
+        sys.exit()
 
-search_button = tk.Button(frame, text="Buscar", command=on_search)
-search_button.pack(side=tk.LEFT)
+    frame = tk.Frame(root)
+    frame.pack(pady=10)
 
-# Botón para modificar la clave de API
-modify_key_button = tk.Button(frame, text="Modificar Clave API", command=modify_api_key)
-modify_key_button.pack(side=tk.LEFT, padx=5)
+    entry = tk.Entry(frame, width=50)
+    entry.pack(side=tk.LEFT, padx=5)
 
-text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=90, height=20)
-text_area.pack(padx=10, pady=10)
-text_area.tag_config("link", foreground="blue", underline=1)
-text_area.tag_bind("link", "<Button-1>", on_link_click)
+    search_button = tk.Button(frame, text="Search" if LANGUAGE == "en" else "Buscar", command=on_search)
+    search_button.pack(side=tk.LEFT)
 
-history_frame = tk.Frame(root)
-history_frame.pack(pady=10)
+    modify_key_button = tk.Button(frame, text="Modify API Key" if LANGUAGE == "en" else "Modificar Clave API", command=modify_api_key)
+    modify_key_button.pack(side=tk.LEFT, padx=5)
 
-history_list = tk.Listbox(history_frame, width=50, height=10)
-history_list.pack(side=tk.LEFT, padx=5)
+    modify_language_button = tk.Button(frame, text="Modify Language" if LANGUAGE == "en" else "Modificar Idioma", command=modify_language)
+    modify_language_button.pack(side=tk.LEFT, padx=5)
 
-button_frame = tk.Frame(history_frame)
-button_frame.pack(side=tk.LEFT)
+    text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=90, height=20)
+    text_area.pack(padx=10, pady=10)
+    text_area.tag_config("link", foreground="blue", underline=1)
+    text_area.tag_bind("link", "<Button-1>", on_link_click)
 
-clear_history_button = tk.Button(button_frame, text="Vaciar Historial", command=clear_history)
-clear_history_button.pack(fill=tk.X)
+    history_frame = tk.Frame(root)
+    history_frame.pack(pady=10)
 
-delete_search_button = tk.Button(button_frame, text="Eliminar Seleccionado", command=delete_search)
-delete_search_button.pack(fill=tk.X)
+    history_list = tk.Listbox(history_frame, width=50, height=10)
+    history_list.pack(side=tk.LEFT, padx=5)
 
-repeat_search_button = tk.Button(button_frame, text="Volver a Buscar", command=repeat_search)
-repeat_search_button.pack(fill=tk.X)
+    button_frame = tk.Frame(history_frame)
+    button_frame.pack(side=tk.LEFT)
 
-update_history_list()
+    clear_history_button = tk.Button(button_frame, text="Clear History" if LANGUAGE == "en" else "Vaciar Historial", command=clear_history)
+    clear_history_button.pack(fill=tk.X)
 
-root.mainloop()
+    delete_search_button = tk.Button(button_frame, text="Delete Selected" if LANGUAGE == "en" else "Eliminar Seleccionado", command=delete_search)
+    delete_search_button.pack(fill=tk.X)
+
+    repeat_search_button = tk.Button(button_frame, text="Repeat Search" if LANGUAGE == "en" else "Volver a Buscar", command=repeat_search)
+    repeat_search_button.pack(fill=tk.X)
+
+    update_history_list()
+
+    root.mainloop()
+
+# ------------------------------
+# Entry Point
+# ------------------------------
+
+if __name__ == "__main__":
+    main()
