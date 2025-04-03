@@ -136,7 +136,9 @@ def modify_language():
         save_config()
         messagebox.showinfo(
             "Success" if LANGUAGE == "en" else "Éxito",
-            "Language updated successfully." if LANGUAGE == "en" else "Idioma actualizado correctamente."
+            "Language updated successfully. Please restart the application for changes to take effect."
+            if LANGUAGE == "en" else
+            "Idioma actualizado correctamente. Por favor, reinicie la aplicación para que los cambios tengan efecto."
         )
     else:
         messagebox.showerror(
