@@ -1,54 +1,97 @@
-# Buscador de Escritorio
+# Desktop Searcher
 
-Este es un programa basado en Python y Tkinter que permite realizar búsquedas en Google a través de la API de SerpAPI, almacenar el historial de búsquedas y visualizar los resultados en una interfaz gráfica.
+This is a Python and Tkinter-based program that allows you to perform Google searches through the SerpAPI, store the search history, and view the results in a graphical interface.
 
-## Características
-- 🔍 Realiza búsquedas en Google usando la API de SerpAPI.
-- 📌 Muestra los resultados con enlaces clickeables.
-- 📂 Guarda el historial de búsquedas en un archivo JSON.
-- 🗑️ Permite eliminar búsquedas individuales del historial.
-- 🚀 Opción para vaciar todo el historial.
-- 🔄 Posibilidad de volver a buscar términos del historial.
-- 🚫 Evita duplicados en el historial, moviendo una búsqueda repetida al primer lugar.
+## Motivation
+This idea came from the thought that it would be better to have a search engine similar to the one in the computer's search bar but using AI to rank the best searches and relying on a better engine than Edge. With this idea in mind, I started coding this program.
 
-## Requisitos
-### Para ejecutar el programa, necesitas:
+## Features
+- Perform Google searches using the SerpAPI.
+- Display results with clickable links.
+- Save search history in a JSON file.
+- Allow deletion of individual searches from the history.
+- Option to clear the entire history.
+- Ability to re-search terms from the history.
+- Avoid duplicates in the history by moving a repeated search to the top.
+- Support for multiple languages (currently English and Spanish).
+
+## Requirements
+### To run the program, you need:
 - Python 3.x
-- Módulos necesarios: `tkinter`, `requests`, `json`, `os`, `webbrowser`
-- Una clave de API de SerpAPI
+- Required modules: `tkinter`, `requests`, `json`, `os`, `webbrowser`
+- A SerpAPI API key
 
-## Instalación
+## Installation
 ```bash
-# Clona o descarga este repositorio
-git clone https://github.com/tu_usuario/Buscador_Escritorio.git
-cd buscador-multimotor
+# Clone or download this repository
+git clone https://github.com/your_user/Desktop_Searcher.git
+cd Desktop_Searcher
 ```
 
-### Configuración
-1. Obtén una clave de SerpAPI en [SerpAPI](https://serpapi.com/) 
-2. Cuando abras el programa, se te pedirá una API
+### Configuration
+1. Get a SerpAPI key from [SerpAPI](https://serpapi.com/).
+2. When you open the program, you will be prompted to enter the API key. You can also modify it later from the interface.
 
-## Uso
-Puedes abrir el archivo ejectuable .exe que se encuentra en la carpeta principal o si tienes el módulo de python instalado, puedes ejecutar en terminal el archivo buscador.py que se encuentra en la carpeta "código"
+## Deployment
+### Option 1: Run from Python
+1. Make sure Python is installed on your system.
+2. Install the required modules by running:
+   ```bash
+   pip install requests
+   ```
+3. Navigate to the project folder and run:
+   ```bash
+   python searcher.py
+   ```
 
-Para ejecutar el código con py:
-``python
-python buscador.py (desde la carpeta código en terminal)
-``
+### Option 2: Run the .exe file
+1. If you have access to the executable file (`.exe`), simply double-click it to start the application.
 
-El .exe simplemente se ejecutará dándole doble click.
+## Usage Examples
+1. **Perform a search:**
+   - Enter a term in the input bar and press "Search."
+   - The results will appear in the window with clickable links.
 
-1. Escribe un término de búsqueda en la barra de entrada y presiona "Buscar".
-2. Los resultados aparecerán en la ventana con enlaces clickeables.
-3. Puedes seleccionar búsquedas anteriores en la lista de historial y repetirlas.
-4. Usa los botones "Eliminar Seleccionado" o "Vaciar Historial" según sea necesario.
+2. **Manage history:**
+   - Select a previous search in the history list and press "Re-Search" to repeat it.
+   - Use the "Delete Selected" or "Clear History" buttons to manage the history.
 
-## Notas
-- ⚠️ Si realizas varias búsquedas del mismo término, este se moverá al inicio en lugar de duplicarse en el historial.
-- 🌐 Para que los enlaces funcionen correctamente, asegúrate de tener acceso a Internet.
+3. **Change settings:**
+   - Modify the API key or language from the corresponding buttons in the interface.
 
-## Licencia
-Este proyecto es de uso libre. Puedes modificarlo y adaptarlo según tus necesidades.
+### Visual Example:
+- **Search:** "Python programming"
+- **Results:** 
+  ```
+  Title: Python.org
+  Link: https://www.python.org
+  Description: The official website of Python programming language.
+  ```
 
+## Notes
+- If you perform multiple searches for the same term, it will move to the top instead of being duplicated in the history.
+- To ensure the links work correctly, make sure you have Internet access.
 
+## Change Log
+### Strategy
+The development of this project has been based on the following strategic objectives:
+1. **Facilitate Google searches from a desktop interface.**
+2. **Provide an intuitive and customizable user experience.**
+3. **Ensure efficient persistence and management of search history.**
 
+### Changes Made
+1. **Support for multiple languages:**
+   - Added functionality to switch between English and Spanish.
+   - Linked to the strategic objective of customization.
+
+2. **Improved history management:**
+   - Implemented functionality to avoid duplicates in the history.
+   - Linked to the strategic objective of efficient history management.
+
+3. **Improved graphical interface:**
+   - Added buttons to modify the API key and language.
+   - Linked to the strategic objective of providing an intuitive experience.
+                     |
+
+## License
+This project is free to use. You can modify and adapt it according to your needs.
