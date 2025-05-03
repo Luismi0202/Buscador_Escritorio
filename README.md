@@ -2,6 +2,8 @@
 
 This is a Python and Tkinter-based program that allows you to perform Google searches through the SerpAPI, store the search history, and view the results in a graphical interface.
 
+[CLICK TO SEE DOCUMENTATION PAGE!!](https://luismi0202.github.io/Buscador_Escritorio/buscador.html)
+
 ## Motivation
 This idea came from the thought that it would be better to have a search engine similar to the one in the computer's search bar but using AI to rank the best searches and relying on a better engine than Edge. With this idea in mind, I started coding this program.
 
